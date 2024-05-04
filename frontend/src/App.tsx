@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from "react";
-import { api } from "./api";
+import { api, apiUpload } from "./api";
 
 type CustomerProps = {
   id: number;
@@ -24,6 +24,33 @@ export default function App() {
     setCustomers(customers);
   }
 
+  async function handleImport(event: FormEvent) {
+    event.preventDefault();
+
+    const formElement = event.target as HTMLFormElement;
+    const formData = new FormData(formElement);
+
+    const file = formData.get("file") as File;
+
+    if (!file || file.size === 0) {
+      (
+        formElement.elements.namedItem("file") as HTMLInputElement
+      ).classList.add("input-error");
+      return;
+    }
+
+    await apiUpload("/customer/upload", {
+      method: "POST",
+      body: formData
+    }).then(response => response.json());
+
+    formElement.reset();
+
+    setTimeout(() => {
+      getCustomers();
+    }, 750);
+  }
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
 
@@ -31,12 +58,16 @@ export default function App() {
     const formData = new FormData(formElement);
 
     if (!formData.get("name")) {
-      (formElement.elements.namedItem("name") as HTMLInputElement).focus();
+      (
+        formElement.elements.namedItem("name") as HTMLInputElement
+      ).classList.add("input-error");
       return;
     }
 
     if (!formData.get("email")) {
-      (formElement.elements.namedItem("email") as HTMLInputElement).focus();
+      (
+        formElement.elements.namedItem("email") as HTMLInputElement
+      ).classList.add("input-error");
       return;
     }
 
@@ -78,7 +109,7 @@ export default function App() {
             type="text"
             id="name"
             name="name"
-            className="w-full p-2 mb-5 rounded"
+            className="w-full p-2 mb-5 rounded border-2"
             placeholder="Digite o nome do cliente"
           />
 
@@ -89,7 +120,7 @@ export default function App() {
             type="email"
             id="email"
             name="email"
-            className="w-full p-2 mb-5 rounded"
+            className="w-full p-2 mb-5 rounded border-2"
             placeholder="Digite o email do cliente"
           />
 
@@ -100,6 +131,30 @@ export default function App() {
             Salvar
           </button>
         </form>
+
+        <p className="text-white text-center">
+          Ou importe clientes através de um arquivo CSV com os campos nome e
+          email
+        </p>
+
+        <div>
+          <form onSubmit={handleImport} className="flex flex-col my-6">
+            <input
+              type="file"
+              name="file"
+              id="file"
+              accept=".csv"
+              className="border p-2 mb-5 text-white rounded"
+            />
+
+            <button
+              type="submit"
+              className="w-full bg-green-500 text-white p-2 rounded"
+            >
+              Importar
+            </button>
+          </form>
+        </div>
 
         <section className="flex flex-col gap-2">
           {customers.map(customer => (

@@ -5,6 +5,9 @@ import {
   FastifyRequest
 } from "fastify";
 import { CustomerController } from "./controllers/CustomerController";
+const multer = require("fastify-multer");
+
+const multerConfig = multer();
 
 export async function routes(
   app: FastifyInstance,
@@ -29,6 +32,15 @@ export async function routes(
     "/customer",
     async (request: FastifyRequest, reply: FastifyReply) => {
       return new CustomerController().delete(request, reply);
+    }
+  );
+
+  // rota de upload de csv para importação de clientes
+  app.post(
+    "/customer/upload",
+    { preHandler: multerConfig.single("file") },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      return new CustomerController().upload(request, reply);
     }
   );
 }

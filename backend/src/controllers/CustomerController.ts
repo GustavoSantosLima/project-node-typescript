@@ -25,6 +25,28 @@ class CustomerController {
     }
   }
 
+  async upload(request: any, reply: FastifyReply) {
+    const fileSting = request.file.buffer.toString();
+
+    const fileLines = fileSting.split("\n");
+
+    const customerService = new CustomerService();
+
+    for await (const line of fileLines) {
+      const [_, name, email] = line.split(",");
+
+      if (!name || !email) {
+        continue;
+      }
+
+      const hash = Math.random().toString(36).substring(7);
+
+      customerService.create({ name, email: `${email}_${hash}` });
+    }
+
+    reply.send({ message: "Customers imported successfully" });
+  }
+
   async delete(request: FastifyRequest, reply: FastifyReply) {
     const { id } = request.query as { id: string };
 

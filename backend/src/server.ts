@@ -1,5 +1,6 @@
 import cors from "@fastify/cors";
 import fastify from "fastify";
+import multer from "fastify-multer";
 import { routes } from "./routes";
 
 const app = fastify({ logger: true });
@@ -10,6 +11,7 @@ app.setErrorHandler((error, request, reply) => {
 
 const start = async () => {
   await app.register(cors);
+  await app.register(multer.contentParser);
   await app.register(routes);
 
   try {
