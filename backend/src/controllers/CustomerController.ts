@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { CustomerService } from "../services/CustomerService";
+import { CustomerService, ICustomer } from "../services/CustomerService";
 
 class CustomerController {
   async get(request: FastifyRequest, reply: FastifyReply) {
@@ -17,7 +17,7 @@ class CustomerController {
       const customer = await customerService.create({
         name: body.name,
         email: body.email
-      });
+      } as ICustomer);
 
       reply.send(customer);
     } catch (error) {
@@ -41,7 +41,7 @@ class CustomerController {
 
       const hash = Math.random().toString(36).substring(7);
 
-      customerService.create({ name, email: `${email}_${hash}` });
+      customerService.create({ name, email: `${email}_${hash}` } as ICustomer);
     }
 
     reply.send({ message: "Customers imported successfully" });
